@@ -10,12 +10,13 @@ export class VisionService {
 
     // Prefer local assets to avoid CDN timeouts in production.
     // Put files under: public/mediapipe/wasm/*
-    const vision = await FilesetResolver.forVisionTasks("/mediapipe/wasm");
+    const base = import.meta.env.BASE_URL || "/";
+    const vision = await FilesetResolver.forVisionTasks(`${base}mediapipe/wasm`);
 
     this.handLandmarker = await HandLandmarker.createFromOptions(vision, {
       baseOptions: {
         // Put model under: public/mediapipe/models/hand_landmarker.task
-        modelAssetPath: "/mediapipe/models/hand_landmarker.task",
+        modelAssetPath: `${base}mediapipe/models/hand_landmarker.task`,
         delegate: "GPU",
       },
       runningMode: "VIDEO",

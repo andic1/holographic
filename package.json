@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "copy:mediapipe": "node scripts/copy-mediapipe-assets.mjs",
+    "postinstall": "npm run copy:mediapipe",
+    "build": "npm run copy:mediapipe && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
