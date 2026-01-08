@@ -420,7 +420,7 @@ const App: React.FC = () => {
         />
       )}
       {(!hasStarted || loading) && !error && (
-        <div className="absolute inset-0 flex flex-col bg-black z-50 text-cyan-500 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+        <div className="absolute inset-0 flex flex-col bg-black z-50 text-cyan-500">
           {/* 顶部状态条 */}
           <div className="flex items-center justify-between px-10 pt-8 text-[11px] tracking-[0.25em] text-cyan-400/80">
             <div className="flex items-center gap-3">

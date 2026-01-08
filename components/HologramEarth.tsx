@@ -1,6 +1,6 @@
 
 import React, { useRef, useMemo, useState, useEffect } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
 
@@ -123,8 +123,13 @@ const ExplosionParticles = ({ position }: { position: THREE.Vector3 }) => {
 
 // Black Crater Decal
 const Crater = ({ position }: { position: THREE.Vector3 }) => {
+  const craterRef = useRef<THREE.Mesh>(null);
+  useFrame(({ camera }) => {
+    if (!craterRef.current) return;
+    craterRef.current.lookAt(camera.position);
+  });
   return (
-    <mesh position={position} lookAt={() => new THREE.Vector3(0,0,0)}>
+    <mesh ref={craterRef} position={position}>
       <circleGeometry args={[0.35, 32]} />
       <meshBasicMaterial color="#000000" transparent opacity={0.95} depthTest={false} />
     </mesh>
@@ -135,8 +140,8 @@ const HologramEarth: React.FC<HologramEarthProps> = ({ rotation, position, scale
   const earthRef = useRef<THREE.Group>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
-  
-  const earthMap = useLoader(THREE.TextureLoader, 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
+
+  // Avoid external texture dependencies in production.
 
   // Calculate Japan Coordinate (Lat 36, Lon 138)
   const japanPos = useMemo(() => {
@@ -213,7 +218,6 @@ const HologramEarth: React.FC<HologramEarthProps> = ({ rotation, position, scale
   });
 
   const material = useMemo(() => new THREE.MeshPhongMaterial({
-    map: earthMap,
     color: new THREE.Color('#00ffff'),
     emissive: new THREE.Color('#002222'),
     specular: new THREE.Color('#00ffff'),
@@ -222,7 +226,7 @@ const HologramEarth: React.FC<HologramEarthProps> = ({ rotation, position, scale
     opacity: 0.9,
     blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide,
-  }), [earthMap]);
+  }), []);
 
   const wireframeMaterial = useMemo(() => new THREE.MeshBasicMaterial({
     color: '#00ffff',
