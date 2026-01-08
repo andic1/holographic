@@ -1,0 +1,7 @@
+{
+  "name": "01-贾维斯：AI悦创编程一对一辅导，微信：Jiabcdefh",
+  "description": "Iron Man style holographic interface with gesture controls using MediaPipe and Three.js.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
