@@ -260,7 +260,7 @@ const HologramEarth: React.FC<HologramEarthProps> = ({ rotation, position, scale
   };
 
   return (
-    <group ref={earthRef} position={[-2, 0, 0]}>
+    <group ref={earthRef} position={[position.x, position.y, position.z]}>
       {/* Core Earth */}
       <mesh material={material}>
         <sphereGeometry args={[1.5, 64, 64]} />
