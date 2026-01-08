@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import https from "node:https";
 import path from "node:path";
 
 const projectRoot = process.cwd();
@@ -33,6 +34,32 @@ function copyFile(src, dest) {
   fs.copyFileSync(src, dest);
 }
 
+function download(url, destPath) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(destPath);
+
+    const request = https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        file.close(() => {
+          fs.existsSync(destPath) && fs.unlinkSync(destPath);
+          reject(new Error(`[mediapipe] Download failed: ${url} (status ${res.statusCode})`));
+        });
+        return;
+      }
+
+      res.pipe(file);
+      file.on("finish", () => file.close(resolve));
+    });
+
+    request.on("error", (err) => {
+      file.close(() => {
+        fs.existsSync(destPath) && fs.unlinkSync(destPath);
+        reject(err);
+      });
+    });
+  });
+}
+
 function main() {
   if (!fs.existsSync(srcDir)) {
     console.error(
@@ -61,11 +88,27 @@ function main() {
   console.log(`[mediapipe] Copied wasm assets to ${destDir}: ${copied.length} files`);
 
   if (!modelExists) {
-    console.warn(
-      `[mediapipe] Missing model file: ${modelPath}.\n` +
-        `Please add hand_landmarker.task under public/mediapipe/models/ so ESA can load it.`
-    );
+    const modelUrl =
+      process.env.MEDIAPIPE_HAND_LANDMARKER_URL ||
+      "https://storage.googleapis.com/mediapipe-tasks/vision/hand_landmarker/hand_landmarker.task";
+
+    console.warn(`[mediapipe] Missing model file: ${modelPath}`);
+    console.log(`[mediapipe] Downloading model from: ${modelUrl}`);
+
+    return download(modelUrl, modelPath)
+      .then(() => {
+        console.log(`[mediapipe] Downloaded model to ${modelPath}`);
+      })
+      .catch((err) => {
+        console.warn(
+          `[mediapipe] Failed to download model. You can manually place it at: ${modelPath}`
+        );
+        console.warn(String(err?.message || err));
+      });
   }
 }
 
-main();
+Promise.resolve(main()).catch((err) => {
+  console.error(String(err?.message || err));
+  process.exit(1);
+});
